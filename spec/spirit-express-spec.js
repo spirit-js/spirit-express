@@ -1,13 +1,19 @@
 const spirit_express = require("../index")
+const spirit = require("spirit")
 
 describe("spirit-express", () => {
   const compat = spirit_express.compat
 
-  let mock_req = {
-    req: function() {
-      return {}
+  let mock_req
+
+  beforeEach(() => {
+    mock_req = {
+      req: function() {
+        return {}
+      }
     }
-  }
+  })
+
   // express middleware next(), passes the response of other
   // middlewares through
   it("Returns a compatible spirit middleware", (done) => {
@@ -55,10 +61,91 @@ describe("spirit-express", () => {
     })
   })
 
-  // express middleware partial response, passes response
-  // through, but modifies the response that comes back through
-  it("calls Express middleware with a compatible `res`")
+  it("changes the request-map to be a node `req` with the original request map properties added to it (with the exception of request.req)", (done) => {
+    const exp = (req, res, next) => {
+      next()
+    }
 
-  it("calls Express middleware with a compatible `req`")
+    const mw = compat(exp)
 
+    mock_req = {
+      a: 123,
+      blah: "hi",
+      req: function() {
+        return { req1: true, req: "doesn't copy over" }
+      }
+    }
+
+    const handler = mw((request) => {
+      expect(request).toEqual(jasmine.objectContaining({
+        a: 123,
+        blah: "hi",
+        req1: true,
+        req: mock_req.req
+      }))
+      // 4 above + _res object
+      expect(Object.keys(request).length).toBe(5)
+    })
+
+    handler(mock_req).then(done)
+  })
+
+  it("maintains request url if a Express middleware overwrites it", (done) => {
+    const exp = (req, res, next) => {
+      req.url = "overwrite"
+      next()
+    }
+
+    const mw = compat(exp)
+
+    mock_req.url = "hi"
+
+    const handler = mw((request) => {
+      expect(request.url).toBe("hi")
+    })
+
+    handler(mock_req).then(done)
+  })
+
+  it("Express middleware and spirit middleware can be used together", (done) => {
+    const handler = (request) => {
+      expect(request.called).toBe(".1234")
+      expect(request.url).toBe("/hi")
+      return "ok"
+    }
+
+    const mw = [
+      (handler) => {
+        return (request) => {
+          request.called += "4"
+          return handler(request)
+        }
+      },
+      compat((req, res, next) => {
+        req.called += "3"
+        next()
+      }),
+      (handler) => {
+        return (request) => {
+          request.called += "2"
+          return handler(request)
+        }
+      },
+      compat((req, res, next) => {
+        req.called += "1"
+        req.url = "/oops"
+        next()
+      })
+    ]
+
+    const reducer = spirit.compose(handler, mw)
+    mock_req.called = "."
+    mock_req.url = "/hi"
+    reducer(mock_req).then((response) => {
+      expect(response).toBe("ok")
+      done()
+    })
+  })
+
+  it("it makes Express middleware support spirit middlewares flow back, if a Express middleware tries to set properties on the `res` object, but does not actually try to 'send' it; it will apply these settings to a response map that flows back")
 })

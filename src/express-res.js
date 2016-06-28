@@ -4,7 +4,6 @@ class ExpressRes {
   constructor(done) {
     this._done = done
     this._end = false
-    this._response = response("")
   }
 
   // a decorator function to check if

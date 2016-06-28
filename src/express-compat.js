@@ -1,5 +1,5 @@
 const Promise = require("bluebird")
-const {utils} = require("spirit")
+const spirit = require("spirit")
 const ExpressRes = require("./express-res")
 
 /**
@@ -40,8 +40,18 @@ const init_req = (request) => {
     r[k] = request[k]
   })
 
-  r.originalUrl = request.url
+  if (request.url) r.originalUrl = request.url
   return r
+}
+
+const partial_response = (res, response) => {
+  if (res.status !== 0) response.status = res.status
+  if (res.body) response.body = res.body
+
+  Object.keys(res.headers).forEach((hdr) => {
+    response.headers[hdr] = res.headers[hdr]
+  })
+  return response
 }
 
 const express_compat = (exp_middleware) => {
@@ -53,7 +63,7 @@ const express_compat = (exp_middleware) => {
         }
 
         const req = init_req(request)
-        const res = init_resp(request, resolve)
+        const res = init_resp(req, resolve)
 
         const next = function(err) {
           if (err) {
@@ -61,13 +71,18 @@ const express_compat = (exp_middleware) => {
           }
 
           // always keep url correct incase a Express middleware overwrites it
-          req.url = req.originalUrl
+          if (req.originalUrl) req.url = req.originalUrl
 
-          resolve(utils.callp(handler, [req])
+          resolve(spirit.utils.callp(handler, [req])
                   .then((response) => {
-                    if (request._res._response) {
-                      // a partial response was made so combine
-                      // it with `response` TODO
+                    const Res = req._res._response
+                    // Exp. Middleware made changes to the "res", but did not end()
+                    // so apply the results to the `response` flowing back
+                    if (Res) {
+                      if (!spirit.node.response.is_response(response)) {
+                        throw new Error("Unable to apply Express middleware results to response. Expected a response map to be returned.")
+                      }
+                      response = partial_response(Res, response)
                     }
                     return response
                   }))
