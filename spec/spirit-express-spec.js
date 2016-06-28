@@ -3,6 +3,11 @@ const spirit_express = require("../index")
 describe("spirit-express", () => {
   const compat = spirit_express.compat
 
+  let mock_req = {
+    req: function() {
+      return {}
+    }
+  }
   // express middleware next(), passes the response of other
   // middlewares through
   it("Returns a compatible spirit middleware", (done) => {
@@ -15,7 +20,7 @@ describe("spirit-express", () => {
       return "ok"
     })
 
-    const result = h()
+    const result = h(mock_req)
     result.then((response) => {
       expect(response).toBe("ok")
       done()
@@ -37,7 +42,7 @@ describe("spirit-express", () => {
       throw new Error("should never get called")
     })
 
-    const result = h()
+    const result = h(mock_req)
     result.then((response) => {
       // the result of a Express middleware always gets converted
       // to a spirit response map

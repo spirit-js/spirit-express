@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "spirit-router": "0.0.x",
+    "spirit": "0.0.x",
     "bluebird": "^3.4.1"
   }
 }
