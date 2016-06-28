@@ -2,7 +2,7 @@ const spirit_express = require("../index")
 const spirit = require("spirit")
 
 describe("spirit-express", () => {
-  const compat = spirit_express.compat
+  const compat = spirit_express
 
   let mock_req
 
@@ -83,8 +83,6 @@ describe("spirit-express", () => {
         req1: true,
         req: mock_req.req
       }))
-      // 4 above + _res object
-      expect(Object.keys(request).length).toBe(5)
     })
 
     handler(mock_req).then(done)

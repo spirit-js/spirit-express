@@ -1,7 +1,9 @@
 # spirit-express
 Wrap around Express API / middleware making them compatible for use with spirit.
 
-Express and spirit middleware can be used in conjunction with each other, it's not one or the other.
+It is _not_ meant to bring full Express API compatibility for every possible Express middleware. To keep things light and small, it currently will only support enough API to get popular Express middleware working.
+
+Supported Express middleware and spirit middleware can be used in conjunction with each other, it's not one or the other.
 
 
 [![Build Status](https://travis-ci.org/spirit-js/spirit-express.svg?branch=master)](https://travis-ci.org/spirit-js/spirit-express)
@@ -14,9 +16,7 @@ Express and spirit middleware can be used in conjunction with each other, it's n
 
 
 ##### Notes
-- The following `req` properties and methods are not support: `req.app`, `req.baseUrl`
-
-If your Express middleware needs these, you can of course write a (spirit) middleware for specific implementations to get your Express middleware to run.
+If your Express middleware needs something unsupported, you can of course write a (spirit) middleware for specific implementations to get your Express middleware to run.
 
 - Express error handling middleware `(err, req, res, next)` are not supported. Instead handle errors the conventional way by using `catch`.
 

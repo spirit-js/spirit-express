@@ -30,8 +30,9 @@
     "jasmine": "^2.4.1"
   },
   "dependencies": {
-    "spirit-router": "0.0.x",
+    "bluebird": "^3.4.1",
+    "express": "^4.14.0",
     "spirit": "0.0.x",
-    "bluebird": "^3.4.1"
+    "spirit-router": "0.0.x"
   }
 }
