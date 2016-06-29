@@ -8,6 +8,7 @@ bench: build
 
 clean:
 	@rm -r lib/
+	@rm -r examples/test
 
 build:
 	@echo "Building src..."
@@ -27,6 +28,9 @@ test: build
 	@echo "\n"
 
 test-ci: build
+	@node_modules/.bin/babel examples/*.js -d examples/test
+	@npm install --prefix ./examples
+	@rm -r ./examples/etc
 	@node_modules/.bin/istanbul cover -x "**/spec/**" node_modules/jasmine/bin/jasmine.js
 
 .PHONY: default build test watch bench test-ci clean release
