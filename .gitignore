@@ -5,3 +5,5 @@ benchmarks/runner
 coverage/
 examples/test
 npm-debug.log
+TODO.md
+uploads/

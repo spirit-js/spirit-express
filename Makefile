@@ -15,6 +15,7 @@ build:
 	@node_modules/.bin/babel src -d lib
 
 release:
+	@rm -r examples/uploads
 	make clean
 	make test
 
@@ -31,6 +32,6 @@ test-ci: build
 	@node_modules/.bin/babel examples/*.js -d examples/test
 	@npm install --prefix ./examples
 	@rm -r ./examples/etc
-	@node_modules/.bin/istanbul cover -x "**/spec/**" node_modules/jasmine/bin/jasmine.js
+	@node_modules/.bin/istanbul cover -x "**/spec/**" -x "**/examples/**" node_modules/jasmine/bin/jasmine.js
 
 .PHONY: default build test watch bench test-ci clean release

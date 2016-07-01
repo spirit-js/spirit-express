@@ -2,12 +2,17 @@ const request = require("superagent")
 const rewire = require("rewire")
 const ex = rewire("../../examples/body-parser")
 
+const server = ex.__get__("server")
+server.close()
 
 describe("Middleware: body-parser", () => {
-  let server = ex.__get__("server")
 
-  afterAll(() => {
-    server.close()
+  beforeAll(() => {
+    server.listen(3009)
+  })
+
+  afterAll((done) => {
+    server.close(done)
   })
 
   it("json ok", (done) => {

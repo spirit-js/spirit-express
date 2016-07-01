@@ -1,1 +1,6 @@
 src/
+examples/test
+uploads/
+coverage/
+.travis.yml
+TODO.md

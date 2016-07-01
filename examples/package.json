@@ -14,6 +14,8 @@
   "license": "ISC",
   "devDependencies": {
     "body-parser": "^1.15.2",
+    "cookie-parser": "^1.4.3",
+    "multer": "^1.1.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0"
   }
