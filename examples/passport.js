@@ -15,10 +15,9 @@ const Strategy = require('passport-local').Strategy
 
 passport.use(new Strategy(
   function(username, password, done) {
-    console.log("here")
     done(null, { id: 123 })
   }
-));
+))
 
 passport.serializeUser(function(user, done) {
   done(null, user.id)
@@ -28,26 +27,36 @@ passport.deserializeUser(function(id, done) {
   done(null, { id: 123 })
 })
 
-const example = () => {
-  return "hello"
+const example = (user) => {
+  if (user) {
+    return "Hello " + user + ", you are Logged in!"
+  }
+  return "You are not logged in"
 }
 
 const login = () => {
-  return "Login"
+  return "<form method='post' action='/login'><input name='username' type='text'><input name='password' type='password'><input type='submit'></form>"
 }
 
 const auth_middleware = [
-  passport.authenticate('local', { failureRedirect: '/login' })
+  express(passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/login"
+  }))
 ]
 
 const app = route.define([
-  route.get("/", [], example),
+  route.get("/", ["user"], example),
   route.get("/login", [], login),
-  route.wrap(route.post("/login", [], "auth"), auth_middleware)
+  route.wrap(route.post("/login"), auth_middleware)
 ])
 
 const middleware = [
-  express(passport.initialize())
+  express(require("body-parser").urlencoded({extended: true})),
+  express(require("cookie-parser")),
+  express(require("session")({ secret: "keyboardcat" })),
+  express(passport.initialize()),
+  express(passport.session())
 ]
 
 const site = spirit.node.adapter(app, middleware)

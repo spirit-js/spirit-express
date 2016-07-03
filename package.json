@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "bluebird": "^3.4.1",
-    "express": "^4.14.0",
     "spirit": "0.0.x",
     "spirit-router": "0.0.x"
   }

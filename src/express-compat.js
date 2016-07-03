@@ -1,4 +1,7 @@
 const Promise = require("bluebird")
+//Promise.onPossiblyUnhandledRejection(function(e, promise) {
+//  throw "Uncaught error: " + e;
+//});
 const spirit = require("spirit")
 const ExpressRes = require("./express-res")
 //const express_req = require("./express-req")
@@ -70,16 +73,43 @@ const express_next = (resolve, reject, req, handler) => {
 
     resolve(spirit.utils.callp(handler, [req])
             .then((response) => {
-              const resp = req._res._response
-              // Exp. Middleware made changes to the "res", but did not end()
-              // so apply the results to the `response` flowing back
-              if (resp) {
-                if (!spirit.node.response.is_response(response)) {
-                  throw new Error("Unable to apply Express middleware results to response. Expected a response map to be returned.")
-                }
-                response = partial_response(resp, response)
+              // some Express middleware modify the `res` obj
+              // but do not call `res.end`
+              // or they do a hack and wrap `res.end`
+              // or `res.writeHead` expecting it to always be
+              // called eventually
+              //
+              // both instances are considered partial responses
+              // so we apply the changes now as part of
+              // spirit middleware flowing back
+              //
+              // this doesn't guarantee the changes are the last
+              // that depends entirely on where this middleware
+              // is placed to determine the order
+              //
+              // this partial response being applied __only__
+              // happens once (first middleware hit on
+              // flow back), all other Express middleware
+              // will simply just return
+              if (req._res._end || !spirit.node.response.is_response(response)) {
+                return response
               }
-              return response
+
+              const p = new Promise((resolve, reject) => {
+                req._res._done = (resp) => {
+                  if (spirit.node.response.is_response(resp)) {
+                    response = partial_response(resp, response)
+                  }
+                  resolve(response)
+                }
+                // calling writeHead with 0 is a 'hack'
+                // to not actually create a response, if there
+                // wasn't already one, simply want to trigger
+                // any Express middleware wrappers
+                req._res.writeHead(0)
+                req._res.end()
+              })
+              return p
             }))
   }
 }
