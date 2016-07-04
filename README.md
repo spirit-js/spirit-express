@@ -18,9 +18,6 @@ Supported Express middleware and spirit middleware can be used in conjunction wi
 ##### Notes
 If your Express middleware needs something unsupported, you can of course write a (spirit) middleware for specific implementations to get your Express middleware to run.
 
-- Express error handling middleware `(err, req, res, next)` are not supported. Instead handle errors the conventional way by using `catch`.
+Express error handling middleware `(err, req, res, next)` are not supported. Instead handle errors the conventional way by using `catch`.
 
-- "originalUrl", "req", "_res" are special properties for the request or req, if a Express middleware overwrites these it may cause problems.
-
-- It changes the original request map in spirit to be a `req` object with all the request map data moved over. Should have no functional impact.
-
+For a full list of compatible API and middleware see [Docs](docs).

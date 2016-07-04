@@ -13,27 +13,29 @@ const express = require("../index")
 const passport = require("passport")
 const Strategy = require('passport-local').Strategy
 
+/*
+ * Since it's just an example, every authentication passes
+ */
 passport.use(new Strategy(
-  function(username, password, done) {
-    done(null, { id: 123 })
+  (username, password, done) => {
+    done(null, { id: username })
   }
 ))
-
-passport.serializeUser(function(user, done) {
+passport.serializeUser((user, done) => {
   done(null, user.id)
 })
-
-passport.deserializeUser(function(id, done) {
-  done(null, { id: 123 })
+passport.deserializeUser((id, done) => {
+  done(null, { id: id })
 })
 
-const example = (user) => {
+const example = (user, sessionid) => {
   if (user) {
-    return "Hello " + user + ", you are Logged in!"
+    return "Hello " + user.id + ", you are Logged in!"
   }
-  return "You are not logged in"
+  return "You are not logged in, <a href='/login'>Login</a>"
 }
 
+// just show a simple login form to get the idea
 const login = () => {
   return "<form method='post' action='/login'><input name='username' type='text'><input name='password' type='password'><input type='submit'></form>"
 }
@@ -46,18 +48,23 @@ const auth_middleware = [
 ]
 
 const app = route.define([
-  route.get("/", ["user"], example),
+  route.get("/", ["user", "sessionID"], example),
   route.get("/login", [], login),
-  route.wrap(route.post("/login"), auth_middleware)
+  route.wrap(route.post("/login", [], "ok"), auth_middleware)
 ])
 
 const middleware = [
-  express(require("body-parser").urlencoded({extended: true})),
-  express(require("cookie-parser")),
-  express(require("session")({ secret: "keyboardcat" })),
+  express(passport.session()),
   express(passport.initialize()),
-  express(passport.session())
+  express(require("express-session")({
+    secret: "keyboardcat",
+    resave: false,
+    saveUninitialized: true
+  })),
+  express(require("body-parser").urlencoded({extended: true})),
 ]
 
 const site = spirit.node.adapter(app, middleware)
-http.createServer(site).listen(3009)
+
+const server = http.createServer(site)
+server.listen(3009)

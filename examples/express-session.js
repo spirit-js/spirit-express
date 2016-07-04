@@ -4,7 +4,7 @@
  */
 const http = require("http")
 const spirit = require("spirit")
-const {route} = require("spirit-router")
+const {route, response} = require("spirit-router")
 // normally this would be require("spirit-express")
 const express = require("../index")
 
@@ -13,7 +13,7 @@ const session = require("express-session")
 const example = (session) => {
   if (!session.counter) session.counter = 0
   session.counter += 1
-  return "session information: " + JSON.stringify(session)
+  return response(JSON.stringify(session)).type("json")
 }
 
 const app = route.define([
@@ -24,8 +24,7 @@ const middleware = [
   express(session({
     secret: "keyboardcat",
     resave: false,
-    saveUninitialized: false,
-    maxAge: 60000
+    saveUninitialized: true
   }))
 ]
 
