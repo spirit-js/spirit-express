@@ -50,18 +50,18 @@ const auth_middleware = [
 const app = route.define([
   route.get("/", ["user", "sessionID"], example),
   route.get("/login", [], login),
-  route.wrap(route.post("/login", [], "ok"), auth_middleware)
+  route.wrap(route.post("/login"), auth_middleware)
 ])
 
 const middleware = [
-  express(passport.session()),
-  express(passport.initialize()),
+  express(require("body-parser").urlencoded({extended: true})),
   express(require("express-session")({
     secret: "keyboardcat",
     resave: false,
     saveUninitialized: true
   })),
-  express(require("body-parser").urlencoded({extended: true})),
+  express(passport.initialize()),
+  express(passport.session())
 ]
 
 const site = spirit.node.adapter(app, middleware)

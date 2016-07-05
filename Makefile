@@ -15,7 +15,7 @@ build:
 	@node_modules/.bin/babel src -d lib
 
 release:
-	@rm -r examples/uploads
+	@rm -r uploads/
 	make clean
 	make test
 

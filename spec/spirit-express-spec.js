@@ -107,7 +107,7 @@ describe("spirit-express", () => {
 
   it("Express middleware and spirit middleware can be used together", (done) => {
     const handler = (request) => {
-      expect(request.called).toBe(".1234")
+      expect(request.called).toBe(".4321")
       expect(request.url).toBe("/hi")
       return "ok"
     }
