@@ -9,12 +9,12 @@
  * Normally you want to keep the secret a secret,
  * but it's outputted, just to visually show it's populated
  */
-const http = require("http")
 const spirit = require("spirit")
 const {route} = require("spirit-router")
 // normally this would be require("spirit-express")
 const express = require("../index")
 
+const http = require("http")
 const cookie_parser = require("cookie-parser")
 
 const example = (cookie, secret) => {

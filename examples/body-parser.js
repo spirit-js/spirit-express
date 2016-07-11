@@ -6,13 +6,12 @@
  * curl --data "a=123&b=hello" http://localhost:3009/
  *
  */
-const http = require("http")
 const spirit = require("spirit")
 const {route} = require("spirit-router")
-
 // normally this would be require("spirit-express")
 const express = require("../index")
 
+const http = require("http")
 const body_parser = require("body-parser")
 
 const example = (body) => {

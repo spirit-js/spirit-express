@@ -3,8 +3,8 @@
  *
  */
 const http = require("http")
-const spirit = require("spirit")
-const {route, response} = require("spirit-router")
+const {response, adapter} = require("spirit").node
+const {route} = require("spirit-router")
 // normally this would be require("spirit-express")
 const express = require("../index")
 
@@ -29,7 +29,7 @@ const app = route.define([
   route.wrap(route.post("/upload", ["file"], up), upload_middleware)
 ])
 
-const site = spirit.node.adapter(app, [])
+const site = adapter(app, [])
 
 const server = http.createServer(site)
 server.listen(3009)

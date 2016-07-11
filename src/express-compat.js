@@ -36,7 +36,7 @@ const init_resp = (request, resolve) => {
  */
 const init_req = (request) => {
   // if this is set, there was a previous Express middleware
-  // so there is no need to combine req into request
+  // so there is no need to combine nodejs `req` into request
   if (request._res) {
     return request
   }
@@ -91,13 +91,13 @@ const express_next = (resolve, reject, req, handler) => {
               // happens once (first middleware hit on
               // flow back), all other Express middleware
               // will simply just return
-              if (req._res._end || !spirit.node.response.is_response(response)) {
+              if (req._res._end || !spirit.node.is_response(response)) {
                 return response
               }
 
               const p = new Promise((resolve, reject) => {
                 req._res._done = (resp) => {
-                  if (spirit.node.response.is_response(resp)) {
+                  if (spirit.node.is_response(resp)) {
                     response = partial_response(resp, response)
                   }
                   resolve(response)

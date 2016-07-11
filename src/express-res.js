@@ -1,4 +1,4 @@
-const {response} = require("spirit-router")
+const {response} = require("spirit").node
 
 class ExpressRes {
   constructor(done) {
@@ -17,7 +17,7 @@ class ExpressRes {
       throw new Error("Express middleware response considered sent, but the response is still being modified")
     }
     if (ensure_resp && typeof this._response === "undefined") {
-      this._response = response("").statusCode(0)
+      this._response = response().status_(0)
     }
   }
 
@@ -45,7 +45,7 @@ class ExpressRes {
     }
 
     Object.keys(headers).forEach((hdr) => {
-      this._response.headers[hdr] = headers[hdr]
+      this._response.set(hdr, headers[hdr])
     })
   }
 
@@ -53,12 +53,12 @@ class ExpressRes {
     if (!this._response) {
       return undefined
     }
-    return this._response.headers[header]
+    return this._response.get(header)
   }
 
   setHeader(header, value) {
     this._check(true)
-    this._response.headers[header] = value
+    this._response.set(header, value)
   }
 
   redirect(status, url) {

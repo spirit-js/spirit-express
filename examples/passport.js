@@ -1,15 +1,13 @@
 /*
  * Example for using Express middleware "passport"
  *
- *
  */
-const http = require("http")
 const spirit = require("spirit")
 const {route} = require("spirit-router")
-
 // normally this would be require("spirit-express")
 const express = require("../index")
 
+const http = require("http")
 const passport = require("passport")
 const Strategy = require('passport-local').Strategy
 

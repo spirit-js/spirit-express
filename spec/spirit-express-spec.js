@@ -42,20 +42,20 @@ describe("spirit-express", () => {
     }
     const mw = compat(exp)
 
-    const h = mw((request) => {
+    const handler = mw((request) => {
       // this never runs since the Express middleware `exp`
       // returns early with a result already
       throw new Error("should never get called")
     })
 
-    const result = h(mock_req)
+    const result = handler(mock_req)
     result.then((response) => {
       // the result of a Express middleware always gets converted
       // to a spirit response map
       expect(response).toEqual(jasmine.objectContaining({
         status: 123,
         headers: {},
-        body: ""
+        body: undefined
       }))
       done()
     })

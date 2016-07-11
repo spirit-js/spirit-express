@@ -2,12 +2,12 @@
  * Example for using Express middleware "express-session"
  *
  */
-const http = require("http")
-const spirit = require("spirit")
-const {route, response} = require("spirit-router")
+const {response, adapter} = require("spirit").node
+const {route} = require("spirit-router")
 // normally this would be require("spirit-express")
 const express = require("../index")
 
+const http = require("http")
 const session = require("express-session")
 
 const example = (session) => {
@@ -28,7 +28,7 @@ const middleware = [
   }))
 ]
 
-const site = spirit.node.adapter(app, middleware)
+const site = adapter(app, middleware)
 
 const server = http.createServer(site)
 server.listen(3009)
