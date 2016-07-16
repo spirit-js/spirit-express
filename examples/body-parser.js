@@ -7,7 +7,7 @@
  *
  */
 const spirit = require("spirit")
-const {route} = require("spirit-router")
+const route = require("spirit-router")
 // normally this would be require("spirit-express")
 const express = require("../index")
 

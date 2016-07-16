@@ -1,4 +1,4 @@
-const compat = require("../lib/express-compat")
+const compat = require("../lib/express-compat").compat
 const ExpressRes = require("../lib/express-res")
 
 describe("express compat", () => {

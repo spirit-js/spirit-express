@@ -1,4 +1,4 @@
-const {response} = require("spirit").node
+const response = require("spirit").node.response
 
 class ExpressRes {
   constructor(done) {

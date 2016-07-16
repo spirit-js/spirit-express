@@ -1,3 +1,1 @@
-var compat = require("./lib/express-compat")
-
-module.exports = compat
+module.exports = require("./lib/express-compat").compat

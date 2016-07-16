@@ -1,10 +1,6 @@
 const Promise = require("bluebird")
-//Promise.onPossiblyUnhandledRejection(function(e, promise) {
-//  throw "Uncaught error: " + e;
-//});
 const spirit = require("spirit")
 const ExpressRes = require("./express-res")
-//const express_req = require("./express-req")
 
 /**
  * Create a Express `res` like object to pass
@@ -16,7 +12,7 @@ const ExpressRes = require("./express-res")
  * @param {function} resolve - Promise resolve
  * @return {ExpressRes}
  */
-const init_resp = (request, resolve) => {
+const init_res = (request, resolve) => {
   if (!request._res) {
     request._res = new ExpressRes(resolve)
   } else {
@@ -29,7 +25,7 @@ const init_resp = (request, resolve) => {
  * transform `request` to be `request` and `req` combined together
  * attach Express req properties and methods
  *
- * If it's already done then do nothing
+ * If this has already happened, then it'll just return
  *
  * @param {request} $param - multiple types / type union
  * @return {request-map} A request map with everything in `req` part of `request`
@@ -48,7 +44,6 @@ const init_req = (request) => {
 
   if (request.url) r.originalUrl = request.url
 
-  //return express_req(r)
   return r
 }
 
@@ -62,7 +57,7 @@ const partial_response = (res, response) => {
   return response
 }
 
-const express_next = (resolve, reject, req, handler) => {
+const next = (resolve, reject, req, handler) => {
   return (err) => {
     if (err) {
       return reject(err)
@@ -71,7 +66,7 @@ const express_next = (resolve, reject, req, handler) => {
     // always keep url correct incase a Express middleware overwrites it
     if (req.originalUrl) req.url = req.originalUrl
 
-    resolve(spirit.utils.callp(handler, [req])
+    resolve(spirit.callp(handler, [req])
             .then((response) => {
               // some Express middleware modify the `res` obj
               // but do not call `res.end`
@@ -114,7 +109,7 @@ const express_next = (resolve, reject, req, handler) => {
   }
 }
 
-const express_compat = (exp_middleware) => {
+const compat = (exp_middleware) => {
   return (handler) => {
     return (request) => {
       return new Promise((resolve, reject) => {
@@ -122,11 +117,17 @@ const express_compat = (exp_middleware) => {
           throw new Error("Unable to use Express middleware. Expected request to have the raw node.js http req available")
         }
         const req = init_req(request)
-        const res = init_resp(req, resolve)
-        exp_middleware(req, res, express_next(resolve, reject, req, handler))
+        const res = init_res(req, resolve)
+        exp_middleware(req, res, next(resolve, reject, req, handler))
       })
     }
   }
 }
 
-module.exports = express_compat
+module.exports = {
+  compat,
+  next,
+  init_req,
+  init_res,
+  partial_response
+}
