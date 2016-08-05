@@ -18,9 +18,13 @@ describe("Middleware: express-session", () => {
   it("ok", (done) => {
     request.get("http://localhost:3009/")
       .end((err, res) => {
-        const cookie = res.header["set-cookie"]
+        let cookie = res.header["set-cookie"]
         expect(res.status).toBe(200)
         expect(res.body.counter).toBe(1)
+        if (!cookie) {
+          return done.fail(new Error("Didn't get a cookie back in express-session example"))
+        }
+
         request.get("http://localhost:3009/")
           .set("Cookie", cookie)
           .end((err, res) => {

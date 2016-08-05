@@ -21,6 +21,10 @@ describe("Middleware: passport", () => {
       .end((err, res) => {
         const cookie = res.header["set-cookie"]
 
+        if (!cookie) {
+          return done.fail("passport example did not get a cookie back on first GET request")
+        }
+
         request.post("http://localhost:3009/login")
           .set("Cookie", cookie)
           .send("username=testuser")

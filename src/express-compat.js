@@ -49,7 +49,7 @@ const init_req = (request) => {
 
 const partial_response = (res, response) => {
   if (res.status !== 0) response.status = res.status
-  if (res.body) response.body = res.body
+  if (res.body !== undefined) response.body = res.body
 
   Object.keys(res.headers).forEach((hdr) => {
     response.headers[hdr] = res.headers[hdr]
@@ -57,68 +57,65 @@ const partial_response = (res, response) => {
   return response
 }
 
-const next = (resolve, reject, req, handler) => {
+const next = (resolve, reject) => {
   return (err) => {
     if (err) {
       return reject(err)
     }
-
-    // always keep url correct incase a Express middleware overwrites it
-    if (req.originalUrl) req.url = req.originalUrl
-
-    resolve(spirit.callp(handler, [req])
-            .then((response) => {
-              // some Express middleware modify the `res` obj
-              // but do not call `res.end`
-              // or they do a hack and wrap `res.end`
-              // or `res.writeHead` expecting it to always be
-              // called eventually
-              //
-              // both instances are considered partial responses
-              // so we apply the changes now as part of
-              // spirit middleware flowing back
-              //
-              // this doesn't guarantee the changes are the last
-              // that depends entirely on where this middleware
-              // is placed to determine the order
-              //
-              // this partial response being applied __only__
-              // happens once (first middleware hit on
-              // flow back), all other Express middleware
-              // will simply just return
-              if (req._res._end || !spirit.node.is_response(response)) {
-                return response
-              }
-
-              const p = new Promise((resolve, reject) => {
-                req._res._done = (resp) => {
-                  if (spirit.node.is_response(resp)) {
-                    response = partial_response(resp, response)
-                  }
-                  resolve(response)
-                }
-                // calling writeHead with 0 is a 'hack'
-                // to not actually create a response, if there
-                // wasn't already one, simply want to trigger
-                // any Express middleware wrappers
-                req._res.writeHead(0)
-                req._res.end()
-              })
-              return p
-            }))
+    return resolve()
   }
 }
 
 const compat = (exp_middleware) => {
   return (handler) => {
     return (request) => {
+      if (request && typeof request.req !== "function") {
+        throw new Error("Unable to use Express middleware. Expected request to have the raw node.js http req available")
+      }
+      const req = init_req(request)
+
       return new Promise((resolve, reject) => {
-        if (request && typeof request.req !== "function") {
-          throw new Error("Unable to use Express middleware. Expected request to have the raw node.js http req available")
-        }
-        const req = init_req(request)
         const res = init_res(req, resolve)
-        exp_middleware(req, res, next(resolve, reject, req, handler))
+        exp_middleware(req, res, next(resolve, reject))
+      }).then((resp) => {
+        // resp is the resolved value of the Exp. middleware
+        // and will only be populated if next() was NOT called
+        // or res.end, res.writeHead was called
+        // therefore we should exit early now
+        if (spirit.node.is_response(resp)) {
+          return resp
+        }
+
+        // always keep url correct incase a Express middleware overwrites it
+        if (req.originalUrl) req.url = req.originalUrl
+
+        // NOTE should really be handler(req).then
+        // handler should always return a promise anyway
+        // only our tests do not return a promise always
+        return spirit.callp(handler, [req]).then((response) => {
+          const res = req._res
+
+          // partially apply whatever was written to res
+          // (if any) this is only done once, and at the
+          // first Express middleware that gets flow back on
+          if (res._state.headers === true || res._state.end === true) return response
+
+          // following deals with Express middlewares hack wrap:
+          // some Express middlewares will wrap writeHead, end
+          // since Express has no way to flow back middleware
+          // thus it queues final changes over all other changes
+          // due to unknown if sync/async, use Promise
+          return new Promise((resolve, reject) => {
+            res._return = () => {
+              res._state.end = true
+              res._state.headers = true
+              resolve(partial_response(res._response, response))
+            }
+            res.writeHead(0)
+            res.end()
+          })
+
+        })
       })
     }
   }

@@ -1,6 +1,6 @@
 {
   "name": "spirit-express",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "use express middleware with spirit",
   "main": "index.js",
   "scripts": {
@@ -30,10 +30,10 @@
     "jasmine": "^2.4.1",
     "rewire": "^2.5.1",
     "superagent": "^2.0.0",
-    "spirit-router": ">=0.0.6"
+    "spirit-router": ">=0.0.8"
   },
   "dependencies": {
     "bluebird": "^3.4.1",
-    "spirit": ">=0.0.10"
+    "spirit": ">=0.0.12"
   }
 }
