@@ -1,6 +1,6 @@
 {
   "name": "spirit-express",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "use express middleware with spirit",
   "main": "index.js",
   "scripts": {

@@ -113,19 +113,15 @@ class ExpressRes {
   }
 
   end(body, encoding, callback) {
-    // Express middlewares hack wrap
-    // see head of src/express-compat.js for explanation
-    if (body === 0 && encoding === 0) {
-      return
-    }
-
     this._has_ended()
 
     if (body) {
       if (this._state.headers === false) {
         this._response.body = body
       } else {
-        this.write(body, encoding, callback)
+        // if headers are already sent then the response body
+        // is a stream (which needs to be closed)
+        this._response.body.end(body, encoding, callback)
       }
     }
 

@@ -43,7 +43,7 @@ describe("ExpressRes", () => {
   })
 
   describe("end", () => {
-    it("ending with body but no resp body, doesn't create a resp body stream", (done) => {
+    it("with body but no resp body, doesn't create a resp body stream", (done) => {
       const _done = (response) => {
         expect(response.status).toBe(200)
         expect(response.headers).toEqual({ abc: 123 })
@@ -55,6 +55,30 @@ describe("ExpressRes", () => {
       res.status(200)
       res.setHeader("abc", 123)
       res.end("hi")
+    })
+
+    it("if body exist & headers are sent, resp body stream is closed", (done) => {
+      const _done = (response) => {
+        const buf = []
+
+        response.body.on("end", () => {
+          expect(buf.join("")).toBe("hih1")
+          done()
+        })
+
+        expect(response.status).toBe(200)
+        expect(response.headers).toEqual({})
+        const st = new stream.Writable({
+          write(chunk, encoding, callback) {
+            buf.push(chunk.toString())
+            callback()
+          }
+        })
+        response.body.pipe(st)
+      }
+      const res = new ExpressRes(_done)
+      res.write("hi")
+      res.end("h1")
     })
   })
 
