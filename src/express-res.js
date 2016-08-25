@@ -92,7 +92,10 @@ class ExpressRes {
       status = 302
     }
 
-    this._response.status_(parseInt(status)).location(url)
+    this._response
+      .status_(parseInt(status))
+      .set("Location", url)
+
     this.end()
   }
 
