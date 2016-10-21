@@ -4,3 +4,5 @@ uploads/
 coverage/
 .travis.yml
 TODO.md
+spec/
+Makefile
