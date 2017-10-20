@@ -23,7 +23,7 @@ describe("Middleware: multer", () => {
 
         const f = res.body
         expect(f.originalname).toBe("README.md")
-        expect(f.mimetype).toBe("text/x-markdown")
+        expect(f.mimetype).toBe("text/markdown")
         expect(f.destination).toBe("uploads/")
         expect(f.path).toMatch(/uploads\//)
         done()

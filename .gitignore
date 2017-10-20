@@ -7,3 +7,4 @@ examples/test
 npm-debug.log
 TODO.md
 uploads/
+package-lock.json
